@@ -2,36 +2,53 @@
 title: "Reproducible Research Project 1"
 author: "Konstantinos Papastamos"
 date: "13 November 2015"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
+
+#Introduction
+
+It is now possible to collect a large amount of data about personal movement using activity monitoring devices such as a Fitbit, Nike Fuelband, or Jawbone Up. These type of devices are part of the "quantified self" movement -- a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. But these data remain under-utilized both because the raw data are hard to obtain and there is a lack of statistical methods and software for processing and interpreting the data.
+
+This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.The goal is to find out if there are differences in activity patterns between weekdays and weekends?
+
 ###Loading and preprocessing the data
 
 So, let's start by loading and cleaning the data:
-```{r}
+```{r,results='hide'}
 Sys.setlocale("LC_ALL","English")
 data=read.csv("activity.csv")
 data$date = as.Date(data$date, "%Y-%m-%d")
 cleaned_data=na.omit(data)
 ```
 Here I also convert the date variable into a date format.
-I also change the locale to english in order for the weekdays() function to work smoothly
+I also change the locale to english in order for the weekdays() function to work properly.
 
 ###What is mean total number of steps taken per day?
 
 In this section I group the steps variable by the date and find the total number of steps for each day.
 ```{r,out.width = '\\maxwidth'}
+
 library(ggplot2)
 library(scales)
+
 total_step_num = aggregate(steps ~ date, data=cleaned_data, sum)
 total_step_num$date = as.Date(total_step_num$date, "%Y-%m-%d")
 total_step_num = total_step_num[order(as.Date(total_step_num$date,format="%d-%m-%Y")),,drop=FALSE]
-ggplot(total_step_num, aes(y=steps, x=date)) + geom_histogram(stat="identity",fill="blue") + theme(axis.text.x = element_text(size=8,angle = 45, vjust=1,hjust=1))+scale_x_date(breaks = "5 days", labels=date_format("%Y-%m-%d"))
+
+g = ggplot(total_step_num, aes(y=steps, x=date)) 
+g = g + geom_histogram(stat="identity",fill="blue") 
+g = g + theme(axis.text.x = element_text(size=8,angle = 45, vjust=1,hjust=1))
+g = g + scale_x_date(date_breaks = "5 days", labels=date_format("%Y-%m-%d"))
+
+g
 ```
 
 So the total number of steps taken per day, the mean and the median are shown below:
 ```{r}
 total_step_num$date=format(total_step_num$date,"%d-%m-%Y")
-total_step_num
+head(total_step_num)
 mean(total_step_num$steps)
 median(total_step_num$steps)
 ```
@@ -82,14 +99,14 @@ So let's see the total number of steps taken each day in the filled data:
 total_step_num_filled = aggregate(steps ~ date, data=filled_data, sum)
 total_step_num_filled$date = as.Date(total_step_num_filled$date, "%Y-%m-%d")
 total_step_num_filled = total_step_num_filled[order(as.Date(total_step_num_filled$date,format="%d-%m-%Y")),,drop=FALSE]
-ggplot(total_step_num_filled, aes(y=steps, x=date)) + geom_histogram(stat="identity",fill="blue") + theme(axis.text.x = element_text(size=8,angle = 45, vjust=1,hjust=1))+scale_x_date(breaks = "5 days", labels=date_format("%Y-%m-%d"))
+ggplot(total_step_num_filled, aes(y=steps, x=date)) + geom_histogram(stat="identity",fill="blue") + theme(axis.text.x = element_text(size=8,angle = 45, vjust=1,hjust=1))+scale_x_date(date_breaks = "5 days", labels=date_format("%Y-%m-%d"))
 ```
 
 And now let's calculate the filled data mean and median:
 
 ```{r}
 total_step_num_filled$date=format(total_step_num_filled$date,"%d-%m-%Y")
-total_step_num_filled
+head(total_step_num_filled)
 mean(total_step_num_filled$steps)
 median(total_step_num_filled$steps)
 ```
@@ -126,7 +143,7 @@ full_week$weekday=as.factor(full_week$weekday)
 ggplot(full_week, aes(y=steps, x=interval, fill = weekday)) + geom_line(col="blue") + ylab("Average Steps Taken per Interval") + xlab("Intervals") + facet_wrap(~ weekday,ncol=1) + theme(strip.background = element_rect(fill="orange"))
 ```
 
-As we can see, in weekends the activity seems ro be higher between the intervals 1000 and 1500 as well as around the interval 2000  while during weekdays the activity seems more intense during the intervals 750 - 1000
+As we can see, in weekends the activity seems ro be higher between the intervals 1000 and 1500 as well as around the interval 2000 while during weekdays the activity seems more intense during the intervals 750 - 1000.
 
 
 
