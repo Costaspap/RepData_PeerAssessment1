@@ -28,14 +28,15 @@ I also change the locale to english in order for the weekdays() function to work
 ###What is mean total number of steps taken per day?
 
 In this section I group the steps variable by the date and find the total number of steps for each day.
-```{r,out.width = '\\maxwidth'}
+```{r,out.width = '\\maxwidth',warning=FALSE}
 
 library(ggplot2)
 library(scales)
 
 total_step_num = aggregate(steps ~ date, data=cleaned_data, sum)
 total_step_num$date = as.Date(total_step_num$date, "%Y-%m-%d")
-total_step_num = total_step_num[order(as.Date(total_step_num$date,format="%d-%m-%Y")),,drop=FALSE]
+ordered = order(as.Date(total_step_num$date,format="%d-%m-%Y"))
+total_step_num = total_step_num[ordered,,drop=FALSE]
 
 g = ggplot(total_step_num, aes(y=steps, x=date)) 
 g = g + geom_histogram(stat="identity",fill="blue") 
@@ -60,7 +61,9 @@ So here we must find the average steps taken per interval across all days.
 
 ```{r,out.width = '\\maxwidth'}
 average_steps = aggregate(steps ~ interval,mean,data=cleaned_data)
-ggplot(average_steps, aes(y=steps, x=interval)) + geom_line(col="blue") + ylab("Average Steps Taken per Interval") + xlab("Intervals")
+p = ggplot(average_steps, aes(y=steps, x=interval)) + geom_line(col="blue") 
+p = p + ylab("Average Steps Taken per Interval") + xlab("Intervals")
+p
 ```
 
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
@@ -95,11 +98,16 @@ for(i in 1:nrow(data)){
 The filled_data dataframe is identical with the original but with the average step number per interval instead of missing values.
 
 So let's see the total number of steps taken each day in the filled data:
-```{r,out.width = '\\maxwidth'}
+```{r,out.width = '\\maxwidth',warning=FALSE}
 total_step_num_filled = aggregate(steps ~ date, data=filled_data, sum)
 total_step_num_filled$date = as.Date(total_step_num_filled$date, "%Y-%m-%d")
-total_step_num_filled = total_step_num_filled[order(as.Date(total_step_num_filled$date,format="%d-%m-%Y")),,drop=FALSE]
-ggplot(total_step_num_filled, aes(y=steps, x=date)) + geom_histogram(stat="identity",fill="blue") + theme(axis.text.x = element_text(size=8,angle = 45, vjust=1,hjust=1))+scale_x_date(date_breaks = "5 days", labels=date_format("%Y-%m-%d"))
+ordered = order(as.Date(total_step_num_filled$date,format="%d-%m-%Y"))
+total_step_num_filled = total_step_num_filled[ordered,,drop=FALSE]
+gg = ggplot(total_step_num_filled, aes(y=steps, x=date)) 
+gg = gg + geom_histogram(stat="identity",fill="blue") 
+gg = gg + theme(axis.text.x = element_text(size=8,angle = 45, vjust=1,hjust=1))
+gg = gg + scale_x_date(date_breaks = "5 days", labels=date_format("%Y-%m-%d"))
+gg
 ```
 
 And now let's calculate the filled data mean and median:
@@ -140,7 +148,11 @@ weekend$weekday="Weekend"
 full_week = rbind(weekday,weekend)
 full_week$weekday=as.factor(full_week$weekday)
 
-ggplot(full_week, aes(y=steps, x=interval, fill = weekday)) + geom_line(col="blue") + ylab("Average Steps Taken per Interval") + xlab("Intervals") + facet_wrap(~ weekday,ncol=1) + theme(strip.background = element_rect(fill="orange"))
+pl = ggplot(full_week, aes(y=steps, x=interval, fill = weekday)) 
+pl= pl + geom_line(col="blue") + ylab("Average Steps Taken per Interval") 
+pl = pl + xlab("Intervals") + facet_wrap(~ weekday,ncol=1) 
+pl = pl + theme(strip.background = element_rect(fill="orange"))
+pl
 ```
 
 As we can see, in weekends the activity seems ro be higher between the intervals 1000 and 1500 as well as around the interval 2000 while during weekdays the activity seems more intense during the intervals 750 - 1000.
